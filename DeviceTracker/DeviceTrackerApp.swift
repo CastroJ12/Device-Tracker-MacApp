@@ -10,7 +10,7 @@ import SwiftUI
 @main
 struct DeviceTrackerApp: App {
     var body: some Scene {
-        WindowGroup {
+        WindowGroup ("Device Maintenance Tracker") {
             ContentView()
         }
     }
