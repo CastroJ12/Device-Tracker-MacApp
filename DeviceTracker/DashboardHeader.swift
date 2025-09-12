@@ -9,6 +9,7 @@ import SwiftUI
 
 struct DashboardHeader: View {
     let counts: DeviceCounts
+    @Binding var selectedTypes: Set<DeviceType>   // ⟵ binding to control filters
     var onAdd: () -> Void
     var onSummary: () -> Void
 
@@ -17,15 +18,13 @@ struct DashboardHeader: View {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Total items in inventory")
-                            .font(.title2.bold())
+                        Text("Total items in inventory").font(.title2.bold())
                         Text("\(counts.total) items")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .font(.subheadline).foregroundStyle(.secondary)
                     }
                     Spacer()
                     HStack(spacing: 8) {
-                        Button("Export CSV", action: onSummary)
+                        Button("Export CSV", action: onSummary) // or your real action
                         Button {
                             onAdd()
                         } label: {
@@ -35,15 +34,35 @@ struct DashboardHeader: View {
                     }
                 }
 
-                // Pills row
+                // Filter pills row
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
+                        // "All" pill
+                        SelectablePill(
+                            text: "All",
+                            icon: "rectangle.grid.2x2",
+                            color: .gray,
+                            isOn: selectedTypes.isEmpty
+                        ) {
+                            selectedTypes.removeAll()
+                        }
+
                         ForEach(DeviceType.allCases) { t in
-                            CountPill(
+                            let isOn = selectedTypes.contains(t)
+                            SelectablePill(
                                 text: "\(t.rawValue.capitalized) \(counts.byType[t] ?? 0)",
+                                icon: t.icon,
                                 color: t.color,
-                                icon: t.icon
-                            )
+                                isOn: isOn
+                            ) {
+                                if isOn {
+                                    selectedTypes.remove(t)
+                                } else {
+                                    selectedTypes.insert(t)        // multi-select
+                                    // For single-select behavior instead:
+                                    // selectedTypes = [t]
+                                }
+                            }
                         }
                     }
                 }
@@ -54,38 +73,32 @@ struct DashboardHeader: View {
     }
 }
 
-struct CountPill: View {
+// Interactive capsule pill
+struct SelectablePill: View {
     let text: String
-    let color: Color
     let icon: String
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon).imageScale(.small)
-            Text(text).font(.footnote.weight(.semibold))
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(
-            Capsule().fill(color.opacity(0.12))
-        )
-        .overlay(
-            Capsule().strokeBorder(color.opacity(0.35), lineWidth: 0.5)
-        )
-        .foregroundStyle(color)
-    }
-}
+    let color: Color
+    let isOn: Bool
+    var action: () -> Void
 
-struct DeviceTypePill: View {
-    let type: DeviceType
     var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: type.icon).imageScale(.small)
-            Text(type.rawValue.capitalized).font(.footnote.weight(.semibold))
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon).imageScale(.small)
+                Text(text).font(.footnote.weight(.semibold))
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                Capsule().fill(isOn ? color : color.opacity(0.12))
+            )
+            .overlay(
+                Capsule().strokeBorder(isOn ? Color.clear : color.opacity(0.35), lineWidth: 0.5)
+            )
+            .foregroundStyle(isOn ? Color.white : color)
+            .contentShape(Capsule())
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Capsule().fill(type.color.opacity(0.12)))
-        .overlay(Capsule().strokeBorder(type.color.opacity(0.35), lineWidth: 0.5))
-        .foregroundStyle(type.color)
+        .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.15), value: isOn)
     }
 }
