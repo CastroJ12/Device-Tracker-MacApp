@@ -10,11 +10,11 @@ import SwiftUI
 struct DashboardCardStyle: GroupBoxStyle {
     func makeBody(configuration: Configuration) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            if let label = configuration.label as? Text, !label.string.isEmpty {
-                Text(label.string).font(.headline)
-                    .padding(.horizontal, 14)
-                    .padding(.top, 12)
-            }
+            configuration.label
+                .font(.headline)
+                .padding(.horizontal, 14)
+                .padding(.top, 12)
+
             configuration.content
         }
         .background(

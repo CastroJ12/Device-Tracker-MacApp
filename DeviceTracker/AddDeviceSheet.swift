@@ -29,8 +29,8 @@ struct AddDeviceSheet: View {
                         .textFieldStyle(.roundedBorder)
                 }
                 GridRow {
-                    //Text("Type")
-                    Picker("Type", selection: $type) {
+                    Text("Type")
+                    Picker("", selection: $type) {
                         ForEach(DeviceType.allCases) { t in
                             Label(t.rawValue.capitalized, systemImage: t.icon).tag(t)
                         }
