@@ -16,13 +16,17 @@ struct ContentView: View {
         .init(\.serial, order: .forward)
     ]
 
+    @State private var selectedTypes: Set<DeviceType> = []
+    
     var filtered: [Device] {
         let trimmed = search.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return devices }
-        return devices.filter {
-            $0.serial.localizedCaseInsensitiveContains(trimmed)
-            || $0.type.rawValue.localizedCaseInsensitiveContains(trimmed)
-        }
+        let base = trimmed.isEmpty
+            ? devices
+            : devices.filter {
+                $0.serial.localizedCaseInsensitiveContains(trimmed) ||
+                $0.type.rawValue.localizedCaseInsensitiveContains(trimmed)
+            }
+        return selectedTypes.isEmpty ? base : base.filter { selectedTypes.contains($0.type) }
     }
 
     var body: some View {
@@ -30,6 +34,7 @@ struct ContentView: View {
             // Header / Card
             DashboardHeader(
                 counts: DeviceCounts(devices: devices),
+                selectedTypes: $selectedTypes,
                 onAdd: { showingAdd = true },
                 onSummary: { /* hook up later */ }
             )
@@ -53,11 +58,9 @@ struct ContentView: View {
                         .padding(.vertical, 4)
                     }
                     TableColumn("Type") { d in
-                        HStack(spacing: 8) {
-                            DeviceTypePill(type: d.type)
-                            Spacer()
-                        }
-                        .padding(.vertical, 4)
+                        Text(d.type.rawValue.capitalized)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 4)
                     }
                     TableColumn("Last Maintenance") { d in
                         Text(d.lastMaintenance, style: .date)
