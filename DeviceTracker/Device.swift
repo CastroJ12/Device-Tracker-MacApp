@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import SwiftData
 
 enum DeviceType: String, CaseIterable, Codable, Identifiable {
     case macbook = "MACBOOK"
@@ -33,12 +34,26 @@ enum DeviceType: String, CaseIterable, Codable, Identifiable {
     }
 }
 
-struct Device: Identifiable, Hashable, Codable {
-    var id = UUID()
+@Model
+final class Device {
+    // Stored properties persisted by SwiftData
     var serial: String
-    var type: DeviceType
+    var typeRaw: String
     var lastMaintenance: Date
     var nextDue: Date?
+
+    // Convenience computed wrapper to work with DeviceType in UI
+    var type: DeviceType {
+        get { DeviceType(rawValue: typeRaw) ?? .macbook }
+        set { typeRaw = newValue.rawValue }
+    }
+
+    init(serial: String, type: DeviceType, lastMaintenance: Date, nextDue: Date?) {
+        self.serial = serial
+        self.typeRaw = type.rawValue
+        self.lastMaintenance = lastMaintenance
+        self.nextDue = nextDue
+    }
 }
 
 struct DeviceCounts {
@@ -53,11 +68,17 @@ struct DeviceCounts {
 
 enum SampleData {
     static let seed: [Device] = [
-        Device(serial: "FJYP6WT07W", type: .macbook,
-               lastMaintenance: ISO8601DateFormatter().date(from: "2025-08-22T00:00:00Z")!,
-               nextDue: ISO8601DateFormatter().date(from: "2025-11-22T00:00:00Z")!),
-        Device(serial: "AB75231", type: .desktop,
-               lastMaintenance: .now.addingTimeInterval(-86_400 * 7),
-               nextDue: .now.addingTimeInterval(86_400 * 75))
+        Device(
+            serial: "FJYP6WT07W",
+            type: .macbook,
+            lastMaintenance: ISO8601DateFormatter().date(from: "2025-08-22T00:00:00Z")!,
+            nextDue: ISO8601DateFormatter().date(from: "2025-11-22T00:00:00Z")!
+        ),
+        Device(
+            serial: "AB75231",
+            type: .desktop,
+            lastMaintenance: .now.addingTimeInterval(-86_400 * 7),
+            nextDue: .now.addingTimeInterval(86_400 * 75)
+        )
     ]
 }
