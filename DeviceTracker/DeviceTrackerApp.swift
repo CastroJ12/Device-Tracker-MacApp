@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct DeviceTrackerApp: App {
@@ -13,5 +14,6 @@ struct DeviceTrackerApp: App {
         WindowGroup ("Device Maintenance Tracker") {
             ContentView()
         }
+        .modelContainer(for: Device.self)
     }
 }
