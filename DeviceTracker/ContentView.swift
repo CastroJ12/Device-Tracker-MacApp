@@ -96,15 +96,6 @@ struct ContentView: View {
         }
         .padding(20)
         .frame(minWidth: 980, minHeight: 640)
-        .toolbar {
-            ToolbarItemGroup {
-                Button {
-                    showingAdd = true
-                } label: {
-                    //Label("Add Device", systemImage: "plus")
-                }
-            }
-        }
         .sheet(isPresented: $showingAdd) {
             AddDeviceSheet { new in
                 modelContext.insert(new)
