@@ -11,9 +11,10 @@ import SwiftData
 @main
 struct DeviceTrackerApp: App {
     var body: some Scene {
-        WindowGroup ("Device Maintenance Tracker") {
-            ContentView()
+        WindowGroup("Device Maintenance Tracker") {
+            RootView()   // Show Main Menu first
         }
         .modelContainer(for: Device.self)
     }
 }
+
