@@ -33,7 +33,6 @@ extension GroupBoxStyle where Self == DashboardCardStyle {
 }
 
 private extension Text {
-    /// Extract raw string (for optional label usage)
     var string: String {
         Mirror(reflecting: self).descendant("storage", "anyTextStorage", "storage") as? String ?? ""
     }

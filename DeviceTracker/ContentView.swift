@@ -127,7 +127,7 @@ extension ContentView {
     @MainActor
     private func exportCSV() {
         let panel = NSSavePanel()
-        panel.allowedFileTypes = ["csv"]
+        panel.allowedContentTypes = [.commaSeparatedText]
         panel.nameFieldStringValue = "devices.csv"
         panel.directoryURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first
         panel.canCreateDirectories = true
@@ -158,7 +158,11 @@ extension ContentView {
         var lines: [String] = []
         lines.append("serial,type,lastMaintenance,nextDue")
 
-        let df = ISO8601DateFormatter()
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+        df.timeZone = TimeZone(secondsFromGMT: 0)
+        df.dateFormat = "yyyy-MM-dd"
+
         for d in devices {
             let serial = escape(d.serial)
             let type = escape(d.type.rawValue)

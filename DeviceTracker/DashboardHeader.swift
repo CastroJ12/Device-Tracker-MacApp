@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DashboardHeader: View {
     let counts: DeviceCounts
-    @Binding var selectedTypes: Set<DeviceType>   // ⟵ binding to control filters
+    @Binding var selectedTypes: Set<DeviceType>   // binding to control filters
     var onAdd: () -> Void
     var onSummary: () -> Void
 
@@ -18,13 +18,12 @@ struct DashboardHeader: View {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .firstTextBaseline) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Total items in inventory").font(.title2.bold())
-                        Text("\(counts.total) items")
+                        Text("Total items in inventory: " + "\(counts.total) items").font(.title2.bold())
                             .font(.subheadline).foregroundStyle(.secondary)
                     }
                     Spacer()
                     HStack(spacing: 8) {
-                        Button("Export CSV", action: onSummary) // or your real action
+                        Button("Export CSV", action: onSummary)
                         Button {
                             onAdd()
                         } label: {
@@ -58,9 +57,7 @@ struct DashboardHeader: View {
                                 if isOn {
                                     selectedTypes.remove(t)
                                 } else {
-                                    selectedTypes.insert(t)        // multi-select
-                                    // For single-select behavior instead:
-                                    // selectedTypes = [t]
+                                    selectedTypes.insert(t)
                                 }
                             }
                         }
