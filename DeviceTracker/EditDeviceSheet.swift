@@ -64,7 +64,7 @@ struct EditDeviceSheet: View {
                 Button("Cancel") { dismiss() }
                 Button("Save Changes") {
                     if !setNext { device.nextDue = nil }
-                    try? modelContext.save()
+                    saveAndSync(modelContext)
                     dismiss()
                 }
                 .keyboardShortcut(.defaultAction)

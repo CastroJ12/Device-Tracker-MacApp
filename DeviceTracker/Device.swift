@@ -71,8 +71,8 @@ enum SampleData {
         Device(
             serial: "FJYP6WT07W",
             type: .macbook,
-            lastMaintenance: ISO8601DateFormatter().date(from: "2025-08-22T00:00:00Z")!,
-            nextDue: ISO8601DateFormatter().date(from: "2025-11-22T00:00:00Z")!
+            lastMaintenance: ISO8601DateFormatter().date(from: "2025-08-22")!,
+            nextDue: ISO8601DateFormatter().date(from: "2025-11-22")!
         ),
         Device(
             serial: "AB75231",

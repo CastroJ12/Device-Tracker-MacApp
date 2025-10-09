@@ -113,7 +113,7 @@ struct MaintenanceSessionView: View {
                     DatePicker("", selection: binding(for: row).lastMaintenance, displayedComponents: .date)
                         .labelsHidden().frame(width: 160)
                 }
-                TableColumn("Next Due?") { row in
+                TableColumn("Next Due Date?") { row in
                     Toggle("", isOn: binding(for: row).setNextDue).labelsHidden().frame(width: 70)
                 }
                 TableColumn("Next Due Date") { row in
@@ -162,7 +162,7 @@ struct MaintenanceSessionView: View {
                                        lastMaintenance: $0.lastMaintenance,
                                        nextDue: $0.setNextDue ? $0.nextDueDate : nil))
         }
-        try? modelContext.save()
+        saveAndSync(modelContext)
         rows = [MaintenanceRow(type: defaultType)]
         showValidation = false
         onDone()

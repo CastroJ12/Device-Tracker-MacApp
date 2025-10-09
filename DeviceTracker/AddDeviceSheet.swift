@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AddDeviceSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
 
     @State private var serial = ""
     @State private var type: DeviceType = .macbook
@@ -67,6 +68,7 @@ struct AddDeviceSheet: View {
                         nextDue: setNext ? nextDue : nil
                     )
                     onSave(new)
+                    saveAndSync(modelContext)
                     dismiss()
                 }
                 .keyboardShortcut(.defaultAction)
