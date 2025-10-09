@@ -25,8 +25,7 @@ struct RootView: View {
         case .inventory:
             VStack(spacing: 0) {
                 HStack {
-                    Button("◀︎ Back") { route = .menu }
-                        .buttonStyle(.link)
+                    GlassBackButton { route = .menu }
                     Spacer()
                 }
                 .padding(.horizontal, 12)
@@ -36,8 +35,7 @@ struct RootView: View {
         case .maintenance:
             VStack(spacing: 0) {
                 HStack {
-                    Button("◀︎ Back") { route = .menu }
-                        .buttonStyle(.link)
+                    GlassBackButton { route = .menu }
                     Spacer()
                 }
                 .padding(.horizontal, 12)
@@ -50,8 +48,7 @@ struct RootView: View {
         case .audit:
             VStack(spacing: 0) {
                 HStack {
-                    Button("◀︎ Back") { route = .menu }
-                        .buttonStyle(.link)
+                    GlassBackButton { route = .menu }
                     Spacer()
                 }
                 .padding(.horizontal, 12)

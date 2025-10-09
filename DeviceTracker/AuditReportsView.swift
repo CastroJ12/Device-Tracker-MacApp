@@ -61,6 +61,7 @@ struct AuditReportsView: View {
                 .disabled(filtered.isEmpty)
             }
 
+            // Row 2 — pills
             HStack(spacing: 10) {
                 Spacer()
                 Pill(title:"Overdue",
@@ -78,6 +79,7 @@ struct AuditReportsView: View {
                 Spacer()
             }
 
+            // Row 3 — look-ahead (when due soon) + actions
             HStack(spacing: 10) {
                 Spacer()
                 if isDueSoon {
@@ -99,9 +101,7 @@ struct AuditReportsView: View {
                 }
                 .disabled(selectedDevices.isEmpty)
 
-                Button(action: {
-                    if let dev = singleSelection { editing = dev }     // set item to show sheet
-                }) {
+                Button(action: { if let dev = singleSelection { editing = dev } }) {
                     Label("Edit", systemImage: "pencil")
                 }
                 .disabled(singleSelection == nil)
@@ -113,6 +113,7 @@ struct AuditReportsView: View {
                 Spacer()
             }
 
+            // Content
             if showEmptyOnly {
                 ContentUnavailableView("Nothing to show", systemImage: "tray",
                                        description: Text("Try another scope, search, or increase the look-ahead."))
@@ -136,32 +137,31 @@ struct AuditReportsView: View {
             }
         }
         .padding(16)
-
-        // Present only when `editing` is non-nil, and pass the device in.
-        .sheet(item: $editing) { dev in
-            EditDeviceSheet(device: dev).frame(width: 500)
-        }
+        .sheet(item: $editing) { dev in EditDeviceSheet(device: dev).frame(width: 500) }
     }
 
-    // MARK: Actions
+    // MARK: Actions (use saveAndSync to persist + refresh notifications)
     private func maintainToday(_ list: [Device]) {
         guard !list.isEmpty else { return }
         let now = Date()
-        for d in list { d.lastMaintenance = now; d.nextDue = Calendar.current.date(byAdding: .month, value: 3, to: now) }
-        try? ctx.save()
+        for d in list {
+            d.lastMaintenance = now
+            d.nextDue = Calendar.current.date(byAdding: .month, value: 3, to: now)
+        }
+        saveAndSync(ctx)
     }
+
     private func delete(_ list: [Device]) {
         guard !list.isEmpty else { return }
         for d in list { ctx.delete(d) }
-        try? ctx.save()
+        saveAndSync(ctx)
         selection.removeAll()
     }
 
-    // MARK: Export (sheet-based, exports the CURRENT filtered view, date-only)
+    // MARK: Export (current filtered)
     @MainActor
     private func exportCSV() {
         guard !filtered.isEmpty else { return }
-
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.commaSeparatedText]
         panel.nameFieldStringValue = "devices.csv"
@@ -170,38 +170,22 @@ struct AuditReportsView: View {
         panel.isExtensionHidden = false
 
         if let window = NSApp.keyWindow ?? NSApp.windows.first(where: { $0.isKeyWindow }) {
-            panel.beginSheetModal(for: window) { response in
-                guard response == .OK, let url = panel.url else { return }
-                writeCSV(to: url, list: filtered)
-            }
+            panel.beginSheetModal(for: window) { r in if r == .OK, let url = panel.url { writeCSV(to: url, list: filtered) } }
         } else {
-            let result = panel.runModal()
-            guard result == .OK, let url = panel.url else { return }
-            writeCSV(to: url, list: filtered)
+            if panel.runModal() == .OK, let url = panel.url { writeCSV(to: url, list: filtered) }
         }
     }
 
     private func writeCSV(to url: URL, list: [Device]) {
-        let csv = makeCSV(from: list)
-        do {
-            try csv.data(using: .utf8)?.write(to: url)
-        } catch {
-            print("CSV export failed:", error.localizedDescription)
-        }
+        do { try makeCSV(from: list).data(using: .utf8)?.write(to: url) }
+        catch { print("CSV export failed:", error.localizedDescription) }
     }
 
     private func makeCSV(from devices: [Device]) -> String {
-        var lines: [String] = []
-        lines.append("serial,type,lastMaintenance,nextDue")
-
-        let df = DateFormatter()
-        df.locale = Locale(identifier: "en_US_POSIX")
-        df.timeZone = TimeZone(secondsFromGMT: 0)
-        df.dateFormat = "yyyy-MM-dd"   // date-only
-
+        var lines = ["serial,type,lastMaintenance,nextDue"]
+        let df = DateFormatter(); df.locale = .init(identifier: "en_US_POSIX"); df.timeZone = .init(secondsFromGMT: 0); df.dateFormat = "yyyy-MM-dd"
         for d in devices {
-            let serial = escape(d.serial)
-            let type = escape(d.type.rawValue)
+            let serial = escape(d.serial), type = escape(d.type.rawValue)
             let last = escape(df.string(from: d.lastMaintenance))
             let next = d.nextDue.map { escape(df.string(from: $0)) } ?? ""
             lines.append("\(serial),\(type),\(last),\(next)")
@@ -209,12 +193,9 @@ struct AuditReportsView: View {
         return lines.joined(separator: "\n") + "\n"
     }
 
-    private func escape(_ field: String) -> String {
-        // Escape quotes and wrap in quotes if needed
-        var f = field.replacingOccurrences(of: "\"", with: "\"\"")
-        if f.contains(",") || f.contains("\n") || f.contains("\"") {
-            f = "\"\(f)\""
-        }
+    private func escape(_ s: String) -> String {
+        var f = s.replacingOccurrences(of: "\"", with: "\"\"")
+        if f.contains(",") || f.contains("\n") || f.contains("\"") { f = "\"\(f)\"" }
         return f
     }
 }
@@ -228,7 +209,6 @@ fileprivate struct Pill: View {
                 .padding(.vertical,6).padding(.horizontal,10)
                 .background((selected ? color.opacity(0.2) : .clear).clipShape(Capsule()))
                 .overlay(Capsule().stroke(selected ? color : .gray.opacity(0.4), lineWidth: 1.5))
-        }
-        .buttonStyle(PlainButtonStyle())
+        }.buttonStyle(.plain)
     }
 }
