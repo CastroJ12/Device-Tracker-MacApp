@@ -28,7 +28,9 @@ struct DeviceTrackerApp: App {
     var body: some Scene {
         WindowGroup("Device Maintenance Tracker") {
             RootView()
+                .frame(minWidth: 1100, minHeight: 720)
         }
+        .defaultSize(width: 1300, height: 820)
         .modelContainer(container)
     }
 }
