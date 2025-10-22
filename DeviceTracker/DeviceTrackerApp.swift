@@ -30,7 +30,7 @@ struct DeviceTrackerApp: App {
             RootView()
                 .frame(minWidth: 1100, minHeight: 720)
         }
-        .defaultSize(width: 1300, height: 820)
+        .defaultSize(width: 1100, height: 720)
         .modelContainer(container)
     }
 }
